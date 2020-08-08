@@ -20,6 +20,7 @@ const {
     InspectorControls,
     PanelColorSettings,
     ColorPalette,
+	InnerBlocks,
 } = wp.blockEditor;
 
 
@@ -34,6 +35,9 @@ const {
 } = wp.components;
 
 const { Component, Fragment } = wp.element;
+
+
+
 
 
 /**
@@ -62,25 +66,6 @@ registerBlockType( 'high-card/block-high-card', {
 
 	// attributes the html elements in block 
 	attributes: {
-		title: {
-			type: 'array',
-			source: 'children',
-			selector: 'h3',
-		},
-		mediaID: {
-			type: 'number',
-		},
-		mediaURL: {
-			type: 'string',
-			source: 'attribute',
-			selector: 'img',
-			attribute: 'src',
-		},
-		description: {
-			type: 'array',
-			source: 'children',
-			selector: '.high-card-description',
-		},
 		highBackground: {
 			type: 'string',
 			default: '#f6f6f6' // is optional
@@ -88,22 +73,14 @@ registerBlockType( 'high-card/block-high-card', {
 		
 		fontColor: {
 			type: 'string',
-			default: '#000' // is optional
+			default: '#f00' // is optional
 		},
 	},
-	example: {
-		attributes: {
-			title: __( 'Featured', 'high-card' ),
-			mediaURL: 'http://placehold.it/1440x700',
-			description: [
-				__( 'The Process', 'high-card' ),
-			],
-		
-		},
-	},
+	
 	supports: {
 		align: true
 	},
+	
 	/**
 	 * The edit function describes the structure of your block in the context of the editor.
 	 * This represents what the editor will render when the block is used.
@@ -111,11 +88,9 @@ registerBlockType( 'high-card/block-high-card', {
 	edit: ( props ) => {
 		const {
 			className,
-			attributes: { title, mediaID, mediaURL, description, fontColor, highBackground },
+			attributes: { fontColor, highBackground },
 			setAttributes,
-			focus
 		} = props;
-		
 		
 		function onChangeBackgroundColor( newBackground ) {
 			setAttributes( { highBackground: newBackground } );
@@ -126,24 +101,19 @@ registerBlockType( 'high-card/block-high-card', {
 			setAttributes( { fontColor: newColor } );
 		}
 		
-		
-		const onChangeTitle = ( value ) => {
-			setAttributes( { title: value } );
-		};
-	
-
-
-		const onSelectImage = ( media ) => {
-			setAttributes( {
-				mediaURL: media.url,
-				mediaID: media.id,
-			} );
-		};
-		const onChangeDescription = ( value ) => {
-			setAttributes( { description: value } );
-		};
-		
-		
+		const HIGH_CARD_TEMPLATE = [
+			[ 'core/columns', { columns: 2 }, [
+				[ 'core/column', {}, [
+					[ 'core/image']
+				] ],
+				
+				[ 'core/column', {}, [
+					['core/heading', {placeholder: 'Enter title ...', className: 'is-head',style:{color:fontColor}}],
+					[ 'core/paragraph', { placeholder: 'Enter heading...', className: 'is-style-custom-style', style:{color:fontColor}} ]
+				] ],
+            
+			]]
+		];
 		
 			 
 		return ( 
@@ -171,58 +141,10 @@ registerBlockType( 'high-card/block-high-card', {
 				</InspectorControls>
 		
 			
-				<RichText
-					tagName="h3"
-					placeholder={__('Name of of Featured Product', 'high-card')}
-					style={{color: fontColor}}
-					value={ title }
-					onChange={ onChangeTitle }
-				/>
-				
-				<div className="high-card-image">
-					<MediaUpload
-						onSelect={ onSelectImage }
-						allowedTypes="image"
-						value={ mediaID }
-						render={ ( { open } ) => (
-							<Button
-								className={
-									mediaID
-										? 'image-button'
-										: 'button button-large'
-								}
-								onClick={ open }
-							>
-							{ ! mediaID ? (
-								__( 'Upload Image', 'high-card' )
-							) : (
-								<img
-									src={ mediaURL }
-									alt={ __(
-										'High Card Image',
-										'high-card'
-									) }
-								/>
-							) }
-							</Button>
-						) }
-					/>
-				
-				</div>
-				
-				<RichText
-					tagName="div"
-					multiline="p"
-					className="high-card-description"
-					placeholder={ __(
-						'Descriobe image',
-						'gutenberg-examples'
-					) }
-					style={{color: fontColor}}
-					value={description}
-					onChange={ onChangeDescription}
-				/>
+			<InnerBlocks template={HIGH_CARD_TEMPLATE} templateLock='all'/>
+			
 			</div>
+			
 		);
 	},
 
@@ -243,25 +165,10 @@ registerBlockType( 'high-card/block-high-card', {
 			attributes: { title, mediaURL, description, fontColor, highBackground},
 		} = props;
 		return (
+			
 			<div className={ className } style={{backgroundColor: props.attributes.highBackground}}>
 			
-				<RichText.Content tagName="h3" value={ title } 
-					style={{color: fontColor}}/>
-
-				{ mediaURL && (
-					<img
-						className="high-card-image"
-						src={ mediaURL }
-						alt={ __( 'High Card Image', 'high-card' ) }
-					/>
-				) }
-
-				<RichText.Content
-					tagName="div"
-					className="high-card-description"
-					value={ description}
-					style={{color: fontColor}}
-				/>
+				<InnerBlocks.Content />
 
 			</div>
 		);
